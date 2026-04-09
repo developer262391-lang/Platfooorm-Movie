@@ -194,14 +194,15 @@
       }
 
       // ---- Build deep link ----------------------------------------------
-      var deepLink = APP_SCHEME + "://film/" + movieId + (ref ? "?ref=" + encodeURIComponent(ref) : "");
-      var appLink  = window.location.origin + window.location.pathname + window.location.search;
+      // Path-style ('film') with query so React Navigation linking config
+      // matches both custom scheme AND https URLs with the same screen entry.
+      var queryStr = "?id=" + movieId + "&type=" + type + (ref ? "&ref=" + encodeURIComponent(ref) : "");
+      var deepLink = APP_SCHEME + "://film" + queryStr;
 
       document.getElementById("al-android").href =
-        "android-app://" + APP_PACKAGE + "/" + APP_SCHEME + "/film/" + movieId;
+        "android-app://" + APP_PACKAGE + "/" + APP_SCHEME + "/film" + queryStr;
 
       // Try to open the app immediately
-      var openedAt = Date.now();
       var triedApp = false;
 
       function tryOpenApp() {
@@ -211,7 +212,7 @@
         var ua = navigator.userAgent || "";
         if (/android/i.test(ua)) {
           window.location.href =
-            "intent://film/" + movieId + "#Intent;scheme=" + APP_SCHEME +
+            "intent://film" + queryStr + "#Intent;scheme=" + APP_SCHEME +
             ";package=" + APP_PACKAGE +
             ";S.browser_fallback_url=" + encodeURIComponent(PLAY_URL) + ";end";
         } else {
