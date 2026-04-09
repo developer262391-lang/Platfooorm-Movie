@@ -2,172 +2,353 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b10" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <title>Platfooorm Movie</title>
+  <link rel="icon" type="image/png" href="/Platfooorm-Movie/icon.png" />
+  <link rel="apple-touch-icon" href="/Platfooorm-Movie/icon.png" />
 
   <!-- Open Graph (WhatsApp / Telegram / Facebook zengin önizleme) -->
   <meta property="og:type" content="video.movie" />
   <meta property="og:site_name" content="Platfooorm Movie" />
   <meta property="og:title" id="og-title" content="Platfooorm Movie" />
   <meta property="og:description" id="og-desc" content="Bu filmi Platfooorm Movie uygulamasında izle." />
-  <meta property="og:image" id="og-image" content="" />
+  <meta property="og:image" id="og-image" content="https://developer262391-lang.github.io/Platfooorm-Movie/icon.png" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" id="tw-title" content="Platfooorm Movie" />
   <meta name="twitter:description" id="tw-desc" content="Bu filmi Platfooorm Movie uygulamasında izle." />
-  <meta name="twitter:image" id="tw-image" content="" />
-
-  <!-- Android App Links hint (browser) -->
-  <link rel="alternate" id="al-android" href="" />
+  <meta name="twitter:image" id="tw-image" content="https://developer262391-lang.github.io/Platfooorm-Movie/icon.png" />
 
   <style>
     :root {
-      --bg: #0b0b10;
+      --bg: #08080c;
       --bg-card: #15151c;
+      --bg-elev: #1c1c26;
       --accent: #e50914;
-      --text: #f5f5f7;
-      --text-dim: #9a9aa5;
+      --accent-hover: #ff0a17;
+      --accent-glow: rgba(229, 9, 20, 0.4);
+      --text: #ffffff;
+      --text-dim: #b5b5c3;
+      --text-faint: #6b6b78;
+      --border: rgba(255, 255, 255, 0.08);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, sans-serif;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
+
+    /* ─── Backdrop hero ─────────────────────────────────────────── */
+    .backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60vh;
+      background-size: cover;
+      background-position: center top;
+      filter: blur(8px) saturate(1.2);
+      transform: scale(1.15);
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      z-index: 0;
+    }
+    .backdrop.loaded { opacity: 0.55; }
+    .backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(8, 8, 12, 0.4) 0%,
+        rgba(8, 8, 12, 0.7) 40%,
+        rgba(8, 8, 12, 0.95) 75%,
+        var(--bg) 100%
+      );
+    }
+
+    /* ─── Layout ────────────────────────────────────────────────── */
     .wrap {
+      position: relative;
+      z-index: 1;
       max-width: 480px;
       margin: 0 auto;
-      padding: 24px 20px 40px;
-      text-align: center;
+      padding: 24px 20px 60px;
+      min-height: 100vh;
     }
-    .logo {
-      font-size: 22px;
+
+    /* ─── Header ────────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      animation: slideDown 0.6s ease both;
+    }
+    .header img {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .header-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .header-title {
+      font-size: 16px;
       font-weight: 800;
-      letter-spacing: 0.5px;
-      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+    .header-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ─── Loading ───────────────────────────────────────────────── */
+    .loading {
+      padding: 80px 20px;
+      text-align: center;
+      color: var(--text-dim);
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255, 255, 255, 0.08);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Content ───────────────────────────────────────────────── */
+    .content { display: none; }
+    .content.show { display: block; animation: fadeUp 0.7s ease both; }
+
+    .poster-wrap {
+      display: flex;
+      justify-content: center;
       margin-bottom: 24px;
     }
     .poster {
-      width: 100%;
-      max-width: 280px;
+      width: 220px;
       aspect-ratio: 2 / 3;
-      border-radius: 14px;
-      background: var(--bg-card);
+      border-radius: 16px;
       object-fit: cover;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      margin: 0 auto 20px;
-      display: block;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+      transform: translateY(20px);
+      opacity: 0;
+      animation: posterIn 0.8s 0.1s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
     }
     .title {
-      font-size: 24px;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 6px;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.15;
+      text-align: center;
+      margin-bottom: 12px;
+      animation: fadeUp 0.6s 0.3s both;
     }
     .meta {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
       color: var(--text-dim);
-      font-size: 14px;
-      margin-bottom: 18px;
+      font-size: 13px;
+      margin-bottom: 22px;
+      animation: fadeUp 0.6s 0.4s both;
     }
-    .meta span { margin: 0 6px; }
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .meta-rating { color: #ffc83d; font-weight: 600; }
+
+    .genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.5s both;
+    }
+    .genre {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      padding: 6px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
     .overview {
       color: var(--text-dim);
       font-size: 14px;
-      line-height: 1.5;
-      margin-bottom: 28px;
+      line-height: 1.6;
+      margin-bottom: 32px;
       text-align: left;
-      max-height: 6em;
-      overflow: hidden;
+      animation: fadeUp 0.6s 0.6s both;
+    }
+    .overview-clamp {
       display: -webkit-box;
       -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .overview-toggle {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    /* ─── CTA Buttons ───────────────────────────────────────────── */
+    .cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeUp 0.6s 0.7s both;
     }
     .cta {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       width: 100%;
-      padding: 16px 20px;
-      border-radius: 12px;
+      padding: 18px 20px;
+      border-radius: 14px;
       font-size: 16px;
       font-weight: 700;
       text-decoration: none;
       border: none;
       cursor: pointer;
-      margin-bottom: 12px;
-      transition: transform 0.1s ease, opacity 0.2s ease;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+      font-family: inherit;
     }
-    .cta:active { transform: scale(0.98); }
+    .cta:active { transform: scale(0.97); }
     .cta-primary {
       background: var(--accent);
       color: #fff;
+      box-shadow: 0 8px 24px var(--accent-glow);
     }
+    .cta-primary:hover { background: var(--accent-hover); }
     .cta-secondary {
-      background: transparent;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
       color: var(--text);
-      border: 1px solid #333;
+      border: 1px solid var(--border);
     }
+    .cta-secondary:hover { background: rgba(255, 255, 255, 0.12); }
+    .cta-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
     .hint {
-      color: var(--text-dim);
-      font-size: 12px;
-      margin-top: 14px;
+      text-align: center;
+      color: var(--text-faint);
+      font-size: 11px;
+      margin-top: 18px;
+      animation: fadeUp 0.6s 0.9s both;
     }
-    .loading {
-      padding: 60px 20px;
-      color: var(--text-dim);
-    }
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid #2a2a35;
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
     .err {
-      padding: 40px 20px;
+      padding: 60px 20px;
+      text-align: center;
       color: var(--text-dim);
     }
+    .err-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    /* ─── Animations ────────────────────────────────────────────── */
+    @keyframes slideDown {
+      from { transform: translateY(-12px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    @keyframes posterIn {
+      from { transform: translateY(30px) scale(0.9); opacity: 0; }
+      to   { transform: translateY(0)    scale(1);   opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 8px 24px var(--accent-glow); }
+      50%      { box-shadow: 0 8px 32px rgba(229, 9, 20, 0.7); }
+    }
+    .cta-primary { animation: pulse 2.5s ease-in-out infinite; }
   </style>
 </head>
 <body>
+  <div class="backdrop" id="backdrop"></div>
+
   <div class="wrap">
-    <div class="logo">PLATFOOORM MOVIE</div>
+    <div class="header">
+      <img src="/Platfooorm-Movie/icon.png" alt="Platfooorm Movie" />
+      <div class="header-text">
+        <div class="header-title">Platfooorm Movie</div>
+        <div class="header-sub">AI Destekli Film Keşfi</div>
+      </div>
+    </div>
 
     <div id="loading" class="loading">
       <div class="spinner"></div>
-      Uygulama açılıyor...
+      Film bilgileri yükleniyor...
     </div>
 
-    <div id="content" style="display:none;">
-      <img id="poster" class="poster" src="" alt="" />
+    <div id="content" class="content">
+      <div class="poster-wrap">
+        <img id="poster" class="poster" src="" alt="" />
+      </div>
       <h1 id="title" class="title"></h1>
       <div id="meta" class="meta"></div>
-      <p id="overview" class="overview"></p>
+      <div id="genres" class="genres"></div>
+      <p id="overview" class="overview overview-clamp"></p>
+      <span id="overview-toggle" class="overview-toggle" style="display:none;">Devamını oku</span>
 
-      <a id="btn-store" class="cta cta-primary"
-         href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
-        📥 Uygulamayı Play Store'dan İndir
-      </a>
-
-      <a id="btn-open" class="cta cta-secondary" href="#">
-        Uygulamada Aç
-      </a>
+      <div class="cta-group">
+        <a id="btn-open" class="cta cta-primary" href="#">
+          <span class="cta-icon">▶</span>
+          Filmi Uygulamada İzle
+        </a>
+        <a id="btn-store" class="cta cta-secondary"
+           href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
+          <span class="cta-icon">📥</span>
+          Uygulamayı İndir
+        </a>
+      </div>
 
       <div class="hint">
-        Uygulama yüklü değilse Play Store'a yönlendirilirsin.
+        Uygulama yüklü değilse Play Store açılır.
       </div>
     </div>
 
     <div id="error" class="err" style="display:none;">
-      Film bulunamadı. <br /><br />
+      <div class="err-icon">🎬</div>
+      <p>Film bulunamadı.</p>
+      <br />
       <a class="cta cta-primary"
-         href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
+         href="https://play.google.com/store/apps/details?id=com.ckapps.test5"
+         style="display:inline-flex; padding:14px 28px;">
         Uygulamayı İndir
       </a>
     </div>
@@ -175,17 +356,17 @@
 
   <script>
     (function () {
-      // ---- Config -------------------------------------------------------
-      var TMDB_API_KEY = "439901aaf73f8b95d97cab6c5e15bf67"; // public read-only key
-      var APP_PACKAGE  = "com.ckapps.test5";
-      var APP_SCHEME   = "platfooormmovie";
-      var PLAY_URL     = "https://play.google.com/store/apps/details?id=" + APP_PACKAGE;
+      // ─── Config ────────────────────────────────────────────────
+      var TMDB_BEARER = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxZmRjM2QwMGJmMmFkODQ2ZjBlYzliMTk5OGJhYTBmOCIsInN1YiI6IjY1ZWNiMjY5Mjc5MGJmMDE3YzQzM2Q1YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.QjJOz1OuBaI3UZUVIeC_UCsLn5oplMb4zel4H1-uTPQ";
+      var APP_PACKAGE = "com.ckapps.test5";
+      var APP_SCHEME  = "platfooormmovie";
+      var PLAY_URL    = "https://play.google.com/store/apps/details?id=" + APP_PACKAGE;
 
-      // ---- Read params --------------------------------------------------
+      // ─── Read params ───────────────────────────────────────────
       var params  = new URLSearchParams(window.location.search);
       var movieId = params.get("id");
-      var ref     = params.get("ref"); // optional referral tag
-      var type    = params.get("type") || "movie"; // movie | tv
+      var ref     = params.get("ref");
+      var type    = params.get("type") || "movie";
 
       if (!movieId) {
         document.getElementById("loading").style.display = "none";
@@ -193,22 +374,15 @@
         return;
       }
 
-      // ---- Build deep link ----------------------------------------------
-      // Path-style ('film') with query so React Navigation linking config
-      // matches both custom scheme AND https URLs with the same screen entry.
-      var queryStr = "?id=" + movieId + "&type=" + type + (ref ? "&ref=" + encodeURIComponent(ref) : "");
+      // ─── Build deep link ───────────────────────────────────────
+      var queryStr = "?id=" + movieId + "&type=" + type +
+                     (ref ? "&ref=" + encodeURIComponent(ref) : "");
       var deepLink = APP_SCHEME + "://film" + queryStr;
 
-      document.getElementById("al-android").href =
-        "android-app://" + APP_PACKAGE + "/" + APP_SCHEME + "/film" + queryStr;
-
-      // Try to open the app immediately
       var triedApp = false;
-
       function tryOpenApp() {
         if (triedApp) return;
         triedApp = true;
-        // Use intent:// on Android Chrome for highest reliability
         var ua = navigator.userAgent || "";
         if (/android/i.test(ua)) {
           window.location.href =
@@ -220,42 +394,34 @@
         }
       }
 
-      // ---- Fetch TMDB ----------------------------------------------------
+      // ─── Fetch TMDB ─────────────────────────────────────────────
       var endpoint = "https://api.themoviedb.org/3/" + type + "/" + movieId +
-                     "?api_key=" + TMDB_API_KEY + "&language=tr-TR";
+                     "?language=tr-TR";
 
-      fetch(endpoint)
+      fetch(endpoint, {
+        headers: {
+          "Authorization": "Bearer " + TMDB_BEARER,
+          "Accept": "application/json"
+        }
+      })
         .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
         .then(function (m) {
           var title    = m.title || m.name || "Film";
           var year     = (m.release_date || m.first_air_date || "").slice(0, 4);
           var rating   = m.vote_average ? m.vote_average.toFixed(1) : null;
-          var runtime  = m.runtime ? m.runtime + " dk" : null;
+          var runtime  = m.runtime ? m.runtime + " dk" :
+                         (m.episode_run_time && m.episode_run_time[0] ? m.episode_run_time[0] + " dk" : null);
           var overview = m.overview || "";
+          var genres   = (m.genres || []).map(function (g) { return g.name; });
           var poster   = m.poster_path
             ? "https://image.tmdb.org/t/p/w500" + m.poster_path
             : "";
           var backdrop = m.backdrop_path
-            ? "https://image.tmdb.org/t/p/w780" + m.backdrop_path
-            : poster;
+            ? "https://image.tmdb.org/t/p/w1280" + m.backdrop_path
+            : "";
 
-          // Fill the page
+          // Page title + meta
           document.title = title + (year ? " (" + year + ") " : " ") + "· Platfooorm Movie";
-          document.getElementById("title").textContent = title;
-          var metaParts = [];
-          if (year)    metaParts.push("<span>" + year + "</span>");
-          if (rating)  metaParts.push("<span>⭐ " + rating + "</span>");
-          if (runtime) metaParts.push("<span>⏱ " + runtime + "</span>");
-          document.getElementById("meta").innerHTML = metaParts.join("·");
-          document.getElementById("overview").textContent = overview;
-          if (poster) {
-            document.getElementById("poster").src = poster;
-            document.getElementById("poster").alt = title;
-          } else {
-            document.getElementById("poster").style.display = "none";
-          }
-
-          // Update Open Graph for nicer link previews on social media
           document.getElementById("og-title").content = title + (year ? " (" + year + ")" : "");
           document.getElementById("tw-title").content = title + (year ? " (" + year + ")" : "");
           if (overview) {
@@ -265,6 +431,51 @@
           if (backdrop) {
             document.getElementById("og-image").content = backdrop;
             document.getElementById("tw-image").content = backdrop;
+            // Hero backdrop
+            var img = new Image();
+            img.onload = function () {
+              var bd = document.getElementById("backdrop");
+              bd.style.backgroundImage = "url('" + backdrop + "')";
+              bd.classList.add("loaded");
+            };
+            img.src = backdrop;
+          }
+
+          // Title + meta
+          document.getElementById("title").textContent = title;
+          var metaParts = [];
+          if (year)    metaParts.push('<span class="meta-item">📅 ' + year + '</span>');
+          if (rating)  metaParts.push('<span class="meta-item meta-rating">★ ' + rating + '</span>');
+          if (runtime) metaParts.push('<span class="meta-item">⏱ ' + runtime + '</span>');
+          document.getElementById("meta").innerHTML = metaParts.join("");
+
+          // Genres
+          var genresEl = document.getElementById("genres");
+          genres.slice(0, 4).forEach(function (g) {
+            var span = document.createElement("span");
+            span.className = "genre";
+            span.textContent = g;
+            genresEl.appendChild(span);
+          });
+
+          // Overview + read more
+          var ovEl = document.getElementById("overview");
+          ovEl.textContent = overview || "Açıklama bulunamadı.";
+          if (overview && overview.length > 200) {
+            var toggle = document.getElementById("overview-toggle");
+            toggle.style.display = "inline-block";
+            toggle.addEventListener("click", function () {
+              var isClamped = ovEl.classList.toggle("overview-clamp");
+              toggle.textContent = isClamped ? "Devamını oku" : "Daha az göster";
+            });
+          }
+
+          // Poster
+          if (poster) {
+            document.getElementById("poster").src = poster;
+            document.getElementById("poster").alt = title;
+          } else {
+            document.getElementById("poster").style.display = "none";
           }
 
           // Manual "Open in app" button
@@ -274,20 +485,19 @@
             tryOpenApp();
           });
 
-          // Show content
+          // Show
           document.getElementById("loading").style.display = "none";
-          document.getElementById("content").style.display = "block";
+          document.getElementById("content").classList.add("show");
         })
-        .catch(function () {
+        .catch(function (err) {
+          console.error("TMDB fetch failed:", err);
           document.getElementById("loading").style.display = "none";
           document.getElementById("error").style.display = "block";
         });
 
-      // Auto-trigger app open after a short delay so the user briefly sees a loading state
-      // (also gives time for TMDB fetch to populate OG meta if a crawler is reading the page)
-      setTimeout(tryOpenApp, 400);
+      // Auto-trigger app open after a small delay
+      setTimeout(tryOpenApp, 500);
 
-      // If user came back (app didn't open), they will see the landing page
       window.addEventListener("pageshow", function () {
         document.getElementById("loading").style.display = "none";
       });
