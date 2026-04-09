@@ -136,20 +136,57 @@
   <div class="wrap">
     <img src="/Platfooorm-Movie/icon.png" alt="Platfooorm Movie" class="icon" />
     <h1>Platfooorm Movie</h1>
-    <div class="tagline">AI Destekli Film Keşfi</div>
-    <p>
+    <div class="tagline" data-i18n="tagline">AI Destekli Film Keşfi</div>
+    <p data-i18n="desc">
       Türkçe arayüz, akıllı film önerileri, devasa katalog ve kişisel AI film asistanı.
       Tek uygulamada her şey.
     </p>
     <div class="features">
-      <div class="feature"><span class="feature-icon">🤖</span>AI Asistan</div>
-      <div class="feature"><span class="feature-icon">🎬</span>Devasa Katalog</div>
-      <div class="feature"><span class="feature-icon">⭐</span>Akıllı Öneriler</div>
-      <div class="feature"><span class="feature-icon">🎯</span>Şanslı Çark</div>
+      <div class="feature"><span class="feature-icon">🤖</span><span data-i18n="f1">AI Asistan</span></div>
+      <div class="feature"><span class="feature-icon">🎬</span><span data-i18n="f2">Devasa Katalog</span></div>
+      <div class="feature"><span class="feature-icon">⭐</span><span data-i18n="f3">Akıllı Öneriler</span></div>
+      <div class="feature"><span class="feature-icon">🎯</span><span data-i18n="f4">Şanslı Çark</span></div>
     </div>
     <a class="btn" href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
-      📥 Play Store'dan İndir
+      📥 <span data-i18n="cta">Play Store'dan İndir</span>
     </a>
   </div>
+
+  <script>
+    var STRINGS = {
+      tr: { tagline: "AI Destekli Film Keşfi",
+            desc: "Türkçe arayüz, akıllı film önerileri, devasa katalog ve kişisel AI film asistanı. Tek uygulamada her şey.",
+            f1: "AI Asistan", f2: "Devasa Katalog", f3: "Akıllı Öneriler", f4: "Şanslı Çark",
+            cta: "Play Store'dan İndir" },
+      en: { tagline: "AI-Powered Movie Discovery",
+            desc: "Smart movie recommendations, huge catalog, and a personal AI movie assistant. Everything in one app.",
+            f1: "AI Assistant", f2: "Huge Catalog", f3: "Smart Picks", f4: "Lucky Spin",
+            cta: "Get it on Play Store" },
+      es: { tagline: "Descubrimiento de películas con IA",
+            desc: "Recomendaciones inteligentes, gran catálogo y asistente de cine con IA. Todo en una app.",
+            f1: "Asistente IA", f2: "Gran Catálogo", f3: "Recomendaciones", f4: "Ruleta",
+            cta: "Descargar en Play Store" },
+      de: { tagline: "KI-gestützte Filmentdeckung",
+            desc: "Intelligente Filmempfehlungen, riesiger Katalog und persönlicher KI-Filmassistent. Alles in einer App.",
+            f1: "KI-Assistent", f2: "Riesiger Katalog", f3: "Empfehlungen", f4: "Glücksrad",
+            cta: "Im Play Store laden" },
+      fr: { tagline: "Découverte de films par IA",
+            desc: "Recommandations intelligentes, énorme catalogue et assistant IA personnel. Tout dans une seule app.",
+            f1: "Assistant IA", f2: "Grand Catalogue", f3: "Recommandations", f4: "Roue Chance",
+            cta: "Disponible sur Play Store" },
+      ar: { tagline: "اكتشاف الأفلام بالذكاء الاصطناعي",
+            desc: "توصيات أفلام ذكية، كتالوج ضخم، ومساعد أفلام شخصي بالذكاء الاصطناعي. كل شيء في تطبيق واحد.",
+            f1: "مساعد ذكي", f2: "كتالوج ضخم", f3: "توصيات ذكية", f4: "عجلة الحظ",
+            cta: "حمّل من Play Store" }
+    };
+    var lang = (navigator.language || "en").toLowerCase().split("-")[0];
+    var t = STRINGS[lang] || STRINGS.en;
+    document.documentElement.lang = lang in STRINGS ? lang : "en";
+    if (lang === "ar") document.documentElement.dir = "rtl";
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var k = el.getAttribute("data-i18n");
+      if (t[k]) el.textContent = t[k];
+    });
+  </script>
 </body>
 </html>

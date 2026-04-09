@@ -14,13 +14,13 @@
   <meta property="og:type" content="video.movie" />
   <meta property="og:site_name" content="Platfooorm Movie" />
   <meta property="og:title" id="og-title" content="Platfooorm Movie" />
-  <meta property="og:description" id="og-desc" content="Bu filmi Platfooorm Movie uygulamasında izle." />
+  <meta property="og:description" id="og-desc" content="Watch this movie on the Platfooorm Movie app." />
   <meta property="og:image" id="og-image" content="https://developer262391-lang.github.io/Platfooorm-Movie/icon.png" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" id="tw-title" content="Platfooorm Movie" />
-  <meta name="twitter:description" id="tw-desc" content="Bu filmi Platfooorm Movie uygulamasında izle." />
+  <meta name="twitter:description" id="tw-desc" content="Watch this movie on the Platfooorm Movie app." />
   <meta name="twitter:image" id="tw-image" content="https://developer262391-lang.github.io/Platfooorm-Movie/icon.png" />
 
   <style>
@@ -306,13 +306,13 @@
       <img src="/Platfooorm-Movie/icon.png" alt="Platfooorm Movie" />
       <div class="header-text">
         <div class="header-title">Platfooorm Movie</div>
-        <div class="header-sub">AI Destekli Film Keşfi</div>
+        <div class="header-sub" data-i18n="tagline">AI Destekli Film Keşfi</div>
       </div>
     </div>
 
     <div id="loading" class="loading">
       <div class="spinner"></div>
-      Film bilgileri yükleniyor...
+      <span data-i18n="loading">Film bilgileri yükleniyor...</span>
     </div>
 
     <div id="content" class="content">
@@ -323,33 +323,33 @@
       <div id="meta" class="meta"></div>
       <div id="genres" class="genres"></div>
       <p id="overview" class="overview overview-clamp"></p>
-      <span id="overview-toggle" class="overview-toggle" style="display:none;">Devamını oku</span>
+      <span id="overview-toggle" class="overview-toggle" style="display:none;" data-i18n="readMore">Devamını oku</span>
 
       <div class="cta-group">
         <a id="btn-open" class="cta cta-primary" href="#">
           <span class="cta-icon">▶</span>
-          Filmi Uygulamada İzle
+          <span data-i18n="watchInApp">Filmi Uygulamada İzle</span>
         </a>
         <a id="btn-store" class="cta cta-secondary"
            href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
           <span class="cta-icon">📥</span>
-          Uygulamayı İndir
+          <span data-i18n="downloadApp">Uygulamayı İndir</span>
         </a>
       </div>
 
-      <div class="hint">
+      <div class="hint" data-i18n="hint">
         Uygulama yüklü değilse Play Store açılır.
       </div>
     </div>
 
     <div id="error" class="err" style="display:none;">
       <div class="err-icon">🎬</div>
-      <p>Film bulunamadı.</p>
+      <p data-i18n="notFound">Film bulunamadı.</p>
       <br />
       <a class="cta cta-primary"
          href="https://play.google.com/store/apps/details?id=com.ckapps.test5"
          style="display:inline-flex; padding:14px 28px;">
-        Uygulamayı İndir
+        <span data-i18n="downloadApp">Uygulamayı İndir</span>
       </a>
     </div>
   </div>
@@ -362,21 +362,99 @@
       var APP_SCHEME  = "platfooormmovie";
       var PLAY_URL    = "https://play.google.com/store/apps/details?id=" + APP_PACKAGE;
 
-      // ─── Read params ───────────────────────────────────────────
-      var params  = new URLSearchParams(window.location.search);
-      var movieId = params.get("id");
-      var ref     = params.get("ref");
-      var type    = params.get("type") || "movie";
+      // ─── i18n ──────────────────────────────────────────────────
+      // UI strings: tr & en. Other languages fall back to English.
+      var STRINGS = {
+        tr: {
+          tagline:     "AI Destekli Film Keşfi",
+          loading:     "Film bilgileri yükleniyor...",
+          watchInApp:  "Filmi Uygulamada İzle",
+          downloadApp: "Uygulamayı İndir",
+          hint:        "Uygulama yüklü değilse Play Store açılır.",
+          notFound:    "Film bulunamadı.",
+          readMore:    "Devamını oku",
+          readLess:    "Daha az göster",
+          noOverview:  "Açıklama bulunamadı.",
+          minutes:     "dk",
+          openInApp:   "Uygulamada Aç",
+          shareDesc:   "Bu filmi Platfooorm Movie uygulamasında izle."
+        },
+        en: {
+          tagline:     "AI-Powered Movie Discovery",
+          loading:     "Loading movie info...",
+          watchInApp:  "Watch in App",
+          downloadApp: "Download App",
+          hint:        "If the app isn't installed, Play Store will open.",
+          notFound:    "Movie not found.",
+          readMore:    "Read more",
+          readLess:    "Show less",
+          noOverview:  "No description available.",
+          minutes:     "min",
+          openInApp:   "Open in App",
+          shareDesc:   "Watch this movie on the Platfooorm Movie app."
+        }
+      };
 
-      if (!movieId) {
+      // Map browser locale → TMDB locale (ISO 639-1 + ISO 3166-1)
+      // TMDB will fall back to English internally if a translation is missing.
+      var TMDB_LOCALE_MAP = {
+        tr: "tr-TR", en: "en-US", es: "es-ES", fr: "fr-FR", de: "de-DE",
+        it: "it-IT", pt: "pt-BR", ru: "ru-RU", ja: "ja-JP", ko: "ko-KR",
+        zh: "zh-CN", ar: "ar-SA", hi: "hi-IN", nl: "nl-NL", pl: "pl-PL",
+        sv: "sv-SE", uk: "uk-UA", id: "id-ID", th: "th-TH", vi: "vi-VN",
+        cs: "cs-CZ", el: "el-GR", he: "he-IL", ro: "ro-RO", hu: "hu-HU",
+        fa: "fa-IR", ur: "ur-PK", bg: "bg-BG", da: "da-DK", fi: "fi-FI",
+        no: "no-NO", sk: "sk-SK", sr: "sr-RS", hr: "hr-HR"
+      };
+
+      // ─── Detect language ───────────────────────────────────────
+      var browserLang = (navigator.language || navigator.userLanguage || "en")
+                          .toLowerCase().split("-")[0];
+      var uiLang      = STRINGS[browserLang] ? browserLang : "en";
+      var tmdbLocale  = TMDB_LOCALE_MAP[browserLang] || "en-US";
+      var t = STRINGS[uiLang];
+
+      // Apply i18n to all elements with data-i18n
+      document.documentElement.lang = uiLang;
+      var i18nNodes = document.querySelectorAll("[data-i18n]");
+      for (var i = 0; i < i18nNodes.length; i++) {
+        var key = i18nNodes[i].getAttribute("data-i18n");
+        if (t[key]) i18nNodes[i].textContent = t[key];
+      }
+
+      // ─── Read params ───────────────────────────────────────────
+      // Supported:
+      //   tmdbId  → TMDB id (used for poster/info AND deep link)
+      //   id      → backend film id (adult or normal)
+      //   type    → 'movie' | 'tv'  (default: movie)
+      //   adult   → '1' for adult content (backend id required)
+      //   actor   → optional, passed through
+      //   ref     → optional referral tag
+      var params  = new URLSearchParams(window.location.search);
+      var tmdbId  = params.get("tmdbId");
+      var localId = params.get("id");
+      var type    = params.get("type") || "movie";
+      var isAdult = params.get("adult") === "1" || params.get("adult") === "true";
+      var actor   = params.get("actor");
+      var ref     = params.get("ref");
+
+      if (!tmdbId && !localId) {
         document.getElementById("loading").style.display = "none";
         document.getElementById("error").style.display = "block";
         return;
       }
 
-      // ─── Build deep link ───────────────────────────────────────
-      var queryStr = "?id=" + movieId + "&type=" + type +
-                     (ref ? "&ref=" + encodeURIComponent(ref) : "");
+      // ─── Build deep link (preserve every param) ────────────────
+      // The native side reads the same query keys from route.params and
+      // a custom getStateFromPath in App.js routes to the right screen.
+      var qParts = [];
+      if (tmdbId)  qParts.push("tmdbId=" + tmdbId);
+      if (localId) qParts.push("id="     + localId);
+      if (type)    qParts.push("type="   + type);
+      if (isAdult) qParts.push("adult=1");
+      if (actor)   qParts.push("actor="  + encodeURIComponent(actor));
+      if (ref)     qParts.push("ref="    + encodeURIComponent(ref));
+      var queryStr = "?" + qParts.join("&");
       var deepLink = APP_SCHEME + "://film" + queryStr;
 
       var triedApp = false;
@@ -394,23 +472,74 @@
         }
       }
 
-      // ─── Fetch TMDB ─────────────────────────────────────────────
-      var endpoint = "https://api.themoviedb.org/3/" + type + "/" + movieId +
-                     "?language=tr-TR";
+      // ─── Generic landing (no TMDB id) ──────────────────────────
+      // For backend-only IDs (e.g. adult content) we can't fetch TMDB,
+      // so show a minimal landing with the app icon and CTA buttons.
+      function showGenericLanding() {
+        var title = isAdult ? "Platfooorm Movie 18+" : "Platfooorm Movie";
+        document.getElementById("title").textContent = title;
+        document.getElementById("poster").src = "/Platfooorm-Movie/icon.png";
+        document.getElementById("poster").style.objectFit = "contain";
+        document.getElementById("poster").style.background = "#15151c";
+        document.getElementById("poster").style.padding = "40px";
+        document.getElementById("overview").textContent = t.shareDesc;
 
-      fetch(endpoint, {
-        headers: {
-          "Authorization": "Bearer " + TMDB_BEARER,
-          "Accept": "application/json"
-        }
-      })
-        .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+        document.getElementById("btn-open").addEventListener("click", function (e) {
+          e.preventDefault();
+          triedApp = false;
+          tryOpenApp();
+        });
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("content").classList.add("show");
+      }
+
+      if (!tmdbId) {
+        showGenericLanding();
+        setTimeout(tryOpenApp, 500);
+        window.addEventListener("pageshow", function () {
+          document.getElementById("loading").style.display = "none";
+        });
+        return;
+      }
+
+      // ─── Fetch TMDB ─────────────────────────────────────────────
+      // Strategy: fetch in user's locale. If overview is missing (TMDB
+      // doesn't have a translation), fetch en-US and merge missing fields.
+      function tmdbFetch(locale) {
+        var url = "https://api.themoviedb.org/3/" + type + "/" + tmdbId +
+                  "?language=" + locale;
+        return fetch(url, {
+          headers: {
+            "Authorization": "Bearer " + TMDB_BEARER,
+            "Accept": "application/json"
+          }
+        }).then(function (r) { return r.ok ? r.json() : Promise.reject(r); });
+      }
+
+      tmdbFetch(tmdbLocale)
+        .then(function (primary) {
+          // If overview/title missing, fall back to English and merge
+          var needsFallback = !primary.overview ||
+                              (!primary.title && !primary.name);
+          if (!needsFallback || tmdbLocale === "en-US") {
+            return primary;
+          }
+          return tmdbFetch("en-US").then(function (fallback) {
+            return {
+              ...fallback,
+              ...Object.fromEntries(
+                Object.entries(primary).filter(function (kv) { return kv[1]; })
+              )
+            };
+          }).catch(function () { return primary; });
+        })
         .then(function (m) {
           var title    = m.title || m.name || "Film";
           var year     = (m.release_date || m.first_air_date || "").slice(0, 4);
           var rating   = m.vote_average ? m.vote_average.toFixed(1) : null;
-          var runtime  = m.runtime ? m.runtime + " dk" :
-                         (m.episode_run_time && m.episode_run_time[0] ? m.episode_run_time[0] + " dk" : null);
+          var runtime  = m.runtime ? m.runtime + " " + t.minutes :
+                         (m.episode_run_time && m.episode_run_time[0] ? m.episode_run_time[0] + " " + t.minutes : null);
           var overview = m.overview || "";
           var genres   = (m.genres || []).map(function (g) { return g.name; });
           var poster   = m.poster_path
@@ -460,13 +589,13 @@
 
           // Overview + read more
           var ovEl = document.getElementById("overview");
-          ovEl.textContent = overview || "Açıklama bulunamadı.";
+          ovEl.textContent = overview || t.noOverview;
           if (overview && overview.length > 200) {
             var toggle = document.getElementById("overview-toggle");
             toggle.style.display = "inline-block";
             toggle.addEventListener("click", function () {
               var isClamped = ovEl.classList.toggle("overview-clamp");
-              toggle.textContent = isClamped ? "Devamını oku" : "Daha az göster";
+              toggle.textContent = isClamped ? t.readMore : t.readLess;
             });
           }
 
