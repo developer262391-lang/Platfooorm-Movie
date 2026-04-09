@@ -424,19 +424,20 @@
 
       // ─── Read params ───────────────────────────────────────────
       // Supported:
-      //   tmdbId  → TMDB id (used for poster/info AND deep link)
-      //   id      → backend film id (adult or normal)
-      //   type    → 'movie' | 'tv'  (default: movie)
-      //   adult   → '1' for adult content (backend id required)
-      //   actor   → optional, passed through
-      //   ref     → optional referral tag
-      var params  = new URLSearchParams(window.location.search);
-      var tmdbId  = params.get("tmdbId");
-      var localId = params.get("id");
-      var type    = params.get("type") || "movie";
-      var isAdult = params.get("adult") === "1" || params.get("adult") === "true";
-      var actor   = params.get("actor");
-      var ref     = params.get("ref");
+      //   tmdbId    → TMDB id (used for poster/info AND deep link)
+      //   id        → backend film id (adult or normal)
+      //   type      → '1' = normal, '2' = adult  (projenin movieType konvansiyonu)
+      //   mediaType → 'movie' | 'tv'  (TMDB media type, default: movie)
+      //   actor     → optional, passed through
+      //   ref       → optional referral tag
+      var params    = new URLSearchParams(window.location.search);
+      var tmdbId    = params.get("tmdbId");
+      var localId   = params.get("id");
+      var movieType = params.get("type") || "1";
+      var mediaType = params.get("mediaType") || "movie";
+      var isAdult   = movieType === "2";
+      var actor     = params.get("actor");
+      var ref       = params.get("ref");
 
       if (!tmdbId && !localId) {
         document.getElementById("loading").style.display = "none";
@@ -448,12 +449,12 @@
       // The native side reads the same query keys from route.params and
       // a custom getStateFromPath in App.js routes to the right screen.
       var qParts = [];
-      if (tmdbId)  qParts.push("tmdbId=" + tmdbId);
-      if (localId) qParts.push("id="     + localId);
-      if (type)    qParts.push("type="   + type);
-      if (isAdult) qParts.push("adult=1");
-      if (actor)   qParts.push("actor="  + encodeURIComponent(actor));
-      if (ref)     qParts.push("ref="    + encodeURIComponent(ref));
+      if (tmdbId)    qParts.push("tmdbId="    + tmdbId);
+      if (localId)   qParts.push("id="        + localId);
+      qParts.push("type=" + movieType);
+      if (mediaType) qParts.push("mediaType=" + mediaType);
+      if (actor)     qParts.push("actor="     + encodeURIComponent(actor));
+      if (ref)       qParts.push("ref="       + encodeURIComponent(ref));
       var queryStr = "?" + qParts.join("&");
       var deepLink = APP_SCHEME + "://film" + queryStr;
 
@@ -507,7 +508,7 @@
       // Strategy: fetch in user's locale. If overview is missing (TMDB
       // doesn't have a translation), fetch en-US and merge missing fields.
       function tmdbFetch(locale) {
-        var url = "https://api.themoviedb.org/3/" + type + "/" + tmdbId +
+        var url = "https://api.themoviedb.org/3/" + mediaType + "/" + tmdbId +
                   "?language=" + locale;
         return fetch(url, {
           headers: {
