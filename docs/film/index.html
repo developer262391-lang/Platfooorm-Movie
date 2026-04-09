@@ -267,16 +267,45 @@
       animation: fadeUp 0.6s 0.9s both;
     }
 
+    /* ─── Error state ───────────────────────────────────────────── */
     .err {
-      padding: 60px 20px;
+      padding: 40px 20px;
       text-align: center;
-      color: var(--text-dim);
+      animation: fadeUp 0.6s ease both;
     }
-    .err-icon {
+    .err-icon-wrap {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(229, 9, 20, 0.15), rgba(80, 30, 200, 0.1));
+      border: 2px solid rgba(229, 9, 20, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 56px;
-      margin-bottom: 16px;
-      opacity: 0.3;
+      animation: bounce 2s ease-in-out infinite;
     }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+    .err-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .err-msg {
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .err .cta-group { max-width: 320px; margin: 0 auto; }
 
     /* ─── Animations ────────────────────────────────────────────── */
     @keyframes slideDown {
@@ -343,14 +372,23 @@
     </div>
 
     <div id="error" class="err" style="display:none;">
-      <div class="err-icon">🎬</div>
-      <p data-i18n="notFound">Film bulunamadı.</p>
-      <br />
-      <a class="cta cta-primary"
-         href="https://play.google.com/store/apps/details?id=com.ckapps.test5"
-         style="display:inline-flex; padding:14px 28px;">
-        <span data-i18n="downloadApp">Uygulamayı İndir</span>
-      </a>
+      <div class="err-icon-wrap">🎬</div>
+      <h2 class="err-title" data-i18n="errTitle">Film Bulunamadı</h2>
+      <p class="err-msg" data-i18n="errMsg">
+        Bu link geçersiz veya film artık mevcut değil. Uygulamayı açıp binlerce filme göz atabilirsin.
+      </p>
+
+      <div class="cta-group">
+        <a id="err-btn-open" class="cta cta-primary" href="#">
+          <span class="cta-icon">▶</span>
+          <span data-i18n="openApp">Uygulamayı Aç</span>
+        </a>
+        <a class="cta cta-secondary"
+           href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
+          <span class="cta-icon">📥</span>
+          <span data-i18n="downloadApp">Uygulamayı İndir</span>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -370,8 +408,11 @@
           loading:     "Film bilgileri yükleniyor...",
           watchInApp:  "Filmi Uygulamada İzle",
           downloadApp: "Uygulamayı İndir",
+          openApp:     "Uygulamayı Aç",
           hint:        "Uygulama yüklü değilse Play Store açılır.",
           notFound:    "Film bulunamadı.",
+          errTitle:    "Film Bulunamadı",
+          errMsg:      "Bu link geçersiz veya film artık mevcut değil. Uygulamayı açıp binlerce filme göz atabilirsin.",
           readMore:    "Devamını oku",
           readLess:    "Daha az göster",
           noOverview:  "Açıklama bulunamadı.",
@@ -384,8 +425,11 @@
           loading:     "Loading movie info...",
           watchInApp:  "Watch in App",
           downloadApp: "Download App",
+          openApp:     "Open the App",
           hint:        "If the app isn't installed, Play Store will open.",
           notFound:    "Movie not found.",
+          errTitle:    "Movie Not Found",
+          errMsg:      "This link is invalid or the movie is no longer available. Open the app to browse thousands of titles.",
           readMore:    "Read more",
           readLess:    "Show less",
           noOverview:  "No description available.",
@@ -439,9 +483,34 @@
       var actor     = params.get("actor");
       var ref       = params.get("ref");
 
+      // ─── Error helper ──────────────────────────────────────────
+      // When the URL is malformed or the movie can't be found, show
+      // a friendly error screen with two CTAs: "open the app" (which
+      // tries to deep-link into the app's home) and "download app".
+      function showError() {
+        document.getElementById("loading").style.display  = "none";
+        document.getElementById("content").style.display  = "none";
+        document.getElementById("error").style.display    = "block";
+
+        // Even from the error screen the user can still open the app —
+        // it just lands on Home (App.js getStateFromPath returns Home
+        // for malformed deep links).
+        document.getElementById("err-btn-open").addEventListener("click", function (e) {
+          e.preventDefault();
+          var ua = navigator.userAgent || "";
+          if (/android/i.test(ua)) {
+            window.location.href =
+              "intent://#Intent;scheme=" + APP_SCHEME +
+              ";package=" + APP_PACKAGE +
+              ";S.browser_fallback_url=" + encodeURIComponent(PLAY_URL) + ";end";
+          } else {
+            window.location.href = APP_SCHEME + "://";
+          }
+        });
+      }
+
       if (!tmdbId && !localId) {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("error").style.display = "block";
+        showError();
         return;
       }
 
@@ -621,8 +690,7 @@
         })
         .catch(function (err) {
           console.error("TMDB fetch failed:", err);
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("error").style.display = "block";
+          showError();
         });
 
       // Auto-trigger app open after a small delay
