@@ -267,45 +267,112 @@
       animation: fadeUp 0.6s 0.9s both;
     }
 
-    /* ─── Error state ───────────────────────────────────────────── */
+    /* ─── Discovery fallback (when id not found) ─────────────────── */
     .err {
-      padding: 40px 20px;
-      text-align: center;
+      padding: 24px 0 40px;
       animation: fadeUp 0.6s ease both;
     }
+    .err-hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
     .err-icon-wrap {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 28px;
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 20px;
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(229, 9, 20, 0.15), rgba(80, 30, 200, 0.1));
       border: 2px solid rgba(229, 9, 20, 0.25);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 56px;
+      font-size: 44px;
       animation: bounce 2s ease-in-out infinite;
     }
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-8px); }
+      50%      { transform: translateY(-6px); }
     }
     .err-title {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       color: var(--text);
     }
     .err-msg {
       color: var(--text-dim);
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 28px;
+      font-size: 13px;
+      line-height: 1.55;
       max-width: 320px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0 auto;
     }
-    .err .cta-group { max-width: 320px; margin: 0 auto; }
+
+    /* Trending grid */
+    .trending-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 32px 0 14px;
+      text-align: center;
+    }
+    .trending-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .trending-card {
+      position: relative;
+      aspect-ratio: 2 / 3;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      text-decoration: none;
+      animation: posterIn 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+    }
+    .trending-card:nth-child(2) { animation-delay: 0.05s; }
+    .trending-card:nth-child(3) { animation-delay: 0.10s; }
+    .trending-card:nth-child(4) { animation-delay: 0.15s; }
+    .trending-card:nth-child(5) { animation-delay: 0.20s; }
+    .trending-card:nth-child(6) { animation-delay: 0.25s; }
+    .trending-card:active { transform: scale(0.96); }
+    .trending-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .trending-card-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 18px 8px 8px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85));
+      font-size: 10px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.2;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .trending-card-rating {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      color: #ffc83d;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
+    .err .cta-group { max-width: 380px; margin: 0 auto; }
 
     /* ─── Animations ────────────────────────────────────────────── */
     @keyframes slideDown {
@@ -372,11 +439,16 @@
     </div>
 
     <div id="error" class="err" style="display:none;">
-      <div class="err-icon-wrap">🎬</div>
-      <h2 class="err-title" data-i18n="errTitle">Film Bulunamadı</h2>
-      <p class="err-msg" data-i18n="errMsg">
-        Bu link geçersiz veya film artık mevcut değil. Uygulamayı açıp binlerce filme göz atabilirsin.
-      </p>
+      <div class="err-hero">
+        <div class="err-icon-wrap">🎬</div>
+        <h2 class="err-title" data-i18n="errTitle">Film Bulunamadı</h2>
+        <p class="err-msg" data-i18n="errMsg">
+          Aradığın film burada yok ama binlerce filme uygulamadan ulaşabilirsin.
+        </p>
+      </div>
+
+      <div class="trending-label" data-i18n="trendingLabel">🔥 Şu An Trend Olanlar</div>
+      <div id="trending-grid" class="trending-grid"></div>
 
       <div class="cta-group">
         <a id="err-btn-open" class="cta cta-primary" href="#">
@@ -410,9 +482,10 @@
           downloadApp: "Uygulamayı İndir",
           openApp:     "Uygulamayı Aç",
           hint:        "Uygulama yüklü değilse Play Store açılır.",
-          notFound:    "Film bulunamadı.",
-          errTitle:    "Film Bulunamadı",
-          errMsg:      "Bu link geçersiz veya film artık mevcut değil. Uygulamayı açıp binlerce filme göz atabilirsin.",
+          notFound:     "Film bulunamadı.",
+          errTitle:     "Film Bulunamadı",
+          errMsg:       "Aradığın film burada yok ama binlerce filme uygulamadan ulaşabilirsin.",
+          trendingLabel: "🔥 Şu An Trend Olanlar",
           readMore:    "Devamını oku",
           readLess:    "Daha az göster",
           noOverview:  "Açıklama bulunamadı.",
@@ -427,9 +500,10 @@
           downloadApp: "Download App",
           openApp:     "Open the App",
           hint:        "If the app isn't installed, Play Store will open.",
-          notFound:    "Movie not found.",
-          errTitle:    "Movie Not Found",
-          errMsg:      "This link is invalid or the movie is no longer available. Open the app to browse thousands of titles.",
+          notFound:     "Movie not found.",
+          errTitle:     "Movie Not Found",
+          errMsg:       "Couldn't find what you were looking for, but the app has thousands more.",
+          trendingLabel: "🔥 Trending Right Now",
           readMore:    "Read more",
           readLess:    "Show less",
           noOverview:  "No description available.",
@@ -483,18 +557,17 @@
       var actor     = params.get("actor");
       var ref       = params.get("ref");
 
-      // ─── Error helper ──────────────────────────────────────────
+      // ─── Discovery fallback ────────────────────────────────────
       // When the URL is malformed or the movie can't be found, show
-      // a friendly error screen with two CTAs: "open the app" (which
-      // tries to deep-link into the app's home) and "download app".
+      // a friendly screen with TRENDING movies from TMDB. Each poster
+      // is a deep link back into the same landing → keeps the user
+      // engaged and increases conversion (download/open app).
       function showError() {
         document.getElementById("loading").style.display  = "none";
         document.getElementById("content").style.display  = "none";
         document.getElementById("error").style.display    = "block";
 
-        // Even from the error screen the user can still open the app —
-        // it just lands on Home (App.js getStateFromPath returns Home
-        // for malformed deep links).
+        // "Open the App" button → deep link into app HOME
         document.getElementById("err-btn-open").addEventListener("click", function (e) {
           e.preventDefault();
           var ua = navigator.userAgent || "";
@@ -507,6 +580,53 @@
             window.location.href = APP_SCHEME + "://";
           }
         });
+
+        // Fetch trending movies from TMDB and render the grid.
+        // Falls silently if it fails — the user still has the CTAs above.
+        fetch("https://api.themoviedb.org/3/trending/movie/week?language=" + tmdbLocale, {
+          headers: {
+            "Authorization": "Bearer " + TMDB_BEARER,
+            "Accept": "application/json"
+          }
+        })
+          .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+          .then(function (data) {
+            var grid = document.getElementById("trending-grid");
+            var movies = (data.results || []).filter(function (m) { return m.poster_path; }).slice(0, 6);
+            if (movies.length === 0) {
+              document.querySelector(".trending-label").style.display = "none";
+              return;
+            }
+            movies.forEach(function (m) {
+              var card = document.createElement("a");
+              card.className = "trending-card";
+              card.href = "?tmdbId=" + m.id + "&type=1&mediaType=movie";
+
+              var img = document.createElement("img");
+              img.loading = "lazy";
+              img.src = "https://image.tmdb.org/t/p/w342" + m.poster_path;
+              img.alt = m.title || m.name || "";
+              card.appendChild(img);
+
+              if (m.vote_average) {
+                var rating = document.createElement("div");
+                rating.className = "trending-card-rating";
+                rating.textContent = "★ " + m.vote_average.toFixed(1);
+                card.appendChild(rating);
+              }
+
+              var overlay = document.createElement("div");
+              overlay.className = "trending-card-overlay";
+              overlay.textContent = m.title || m.name || "";
+              card.appendChild(overlay);
+
+              grid.appendChild(card);
+            });
+          })
+          .catch(function () {
+            // Silently hide the trending label if fetch fails
+            document.querySelector(".trending-label").style.display = "none";
+          });
       }
 
       if (!tmdbId && !localId) {
