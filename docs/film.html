@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>Platfooorm Movie</title>
+
+  <!-- Open Graph (WhatsApp / Telegram / Facebook zengin önizleme) -->
+  <meta property="og:type" content="video.movie" />
+  <meta property="og:site_name" content="Platfooorm Movie" />
+  <meta property="og:title" id="og-title" content="Platfooorm Movie" />
+  <meta property="og:description" id="og-desc" content="Bu filmi Platfooorm Movie uygulamasında izle." />
+  <meta property="og:image" id="og-image" content="" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" id="tw-title" content="Platfooorm Movie" />
+  <meta name="twitter:description" id="tw-desc" content="Bu filmi Platfooorm Movie uygulamasında izle." />
+  <meta name="twitter:image" id="tw-image" content="" />
+
+  <!-- Android App Links hint (browser) -->
+  <link rel="alternate" id="al-android" href="" />
+
+  <style>
+    :root {
+      --bg: #0b0b10;
+      --bg-card: #15151c;
+      --accent: #e50914;
+      --text: #f5f5f7;
+      --text-dim: #9a9aa5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    .poster {
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 2 / 3;
+      border-radius: 14px;
+      background: var(--bg-card);
+      object-fit: cover;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      margin: 0 auto 20px;
+      display: block;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .meta {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+    .meta span { margin: 0 6px; }
+    .overview {
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 28px;
+      text-align: left;
+      max-height: 6em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+    .cta {
+      display: block;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+    }
+    .cta:active { transform: scale(0.98); }
+    .cta-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .cta-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid #333;
+    }
+    .hint {
+      color: var(--text-dim);
+      font-size: 12px;
+      margin-top: 14px;
+    }
+    .loading {
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #2a2a35;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .err {
+      padding: 40px 20px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">PLATFOOORM MOVIE</div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      Uygulama açılıyor...
+    </div>
+
+    <div id="content" style="display:none;">
+      <img id="poster" class="poster" src="" alt="" />
+      <h1 id="title" class="title"></h1>
+      <div id="meta" class="meta"></div>
+      <p id="overview" class="overview"></p>
+
+      <a id="btn-store" class="cta cta-primary"
+         href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
+        📥 Uygulamayı Play Store'dan İndir
+      </a>
+
+      <a id="btn-open" class="cta cta-secondary" href="#">
+        Uygulamada Aç
+      </a>
+
+      <div class="hint">
+        Uygulama yüklü değilse Play Store'a yönlendirilirsin.
+      </div>
+    </div>
+
+    <div id="error" class="err" style="display:none;">
+      Film bulunamadı. <br /><br />
+      <a class="cta cta-primary"
+         href="https://play.google.com/store/apps/details?id=com.ckapps.test5">
+        Uygulamayı İndir
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // ---- Config -------------------------------------------------------
+      var TMDB_API_KEY = "439901aaf73f8b95d97cab6c5e15bf67"; // public read-only key
+      var APP_PACKAGE  = "com.ckapps.test5";
+      var APP_SCHEME   = "platfooormmovie";
+      var PLAY_URL     = "https://play.google.com/store/apps/details?id=" + APP_PACKAGE;
+
+      // ---- Read params --------------------------------------------------
+      var params  = new URLSearchParams(window.location.search);
+      var movieId = params.get("id");
+      var ref     = params.get("ref"); // optional referral tag
+      var type    = params.get("type") || "movie"; // movie | tv
+
+      if (!movieId) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("error").style.display = "block";
+        return;
+      }
+
+      // ---- Build deep link ----------------------------------------------
+      var deepLink = APP_SCHEME + "://film/" + movieId + (ref ? "?ref=" + encodeURIComponent(ref) : "");
+      var appLink  = window.location.origin + window.location.pathname + window.location.search;
+
+      document.getElementById("al-android").href =
+        "android-app://" + APP_PACKAGE + "/" + APP_SCHEME + "/film/" + movieId;
+
+      // Try to open the app immediately
+      var openedAt = Date.now();
+      var triedApp = false;
+
+      function tryOpenApp() {
+        if (triedApp) return;
+        triedApp = true;
+        // Use intent:// on Android Chrome for highest reliability
+        var ua = navigator.userAgent || "";
+        if (/android/i.test(ua)) {
+          window.location.href =
+            "intent://film/" + movieId + "#Intent;scheme=" + APP_SCHEME +
+            ";package=" + APP_PACKAGE +
+            ";S.browser_fallback_url=" + encodeURIComponent(PLAY_URL) + ";end";
+        } else {
+          window.location.href = deepLink;
+        }
+      }
+
+      // ---- Fetch TMDB ----------------------------------------------------
+      var endpoint = "https://api.themoviedb.org/3/" + type + "/" + movieId +
+                     "?api_key=" + TMDB_API_KEY + "&language=tr-TR";
+
+      fetch(endpoint)
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+        .then(function (m) {
+          var title    = m.title || m.name || "Film";
+          var year     = (m.release_date || m.first_air_date || "").slice(0, 4);
+          var rating   = m.vote_average ? m.vote_average.toFixed(1) : null;
+          var runtime  = m.runtime ? m.runtime + " dk" : null;
+          var overview = m.overview || "";
+          var poster   = m.poster_path
+            ? "https://image.tmdb.org/t/p/w500" + m.poster_path
+            : "";
+          var backdrop = m.backdrop_path
+            ? "https://image.tmdb.org/t/p/w780" + m.backdrop_path
+            : poster;
+
+          // Fill the page
+          document.title = title + (year ? " (" + year + ") " : " ") + "· Platfooorm Movie";
+          document.getElementById("title").textContent = title;
+          var metaParts = [];
+          if (year)    metaParts.push("<span>" + year + "</span>");
+          if (rating)  metaParts.push("<span>⭐ " + rating + "</span>");
+          if (runtime) metaParts.push("<span>⏱ " + runtime + "</span>");
+          document.getElementById("meta").innerHTML = metaParts.join("·");
+          document.getElementById("overview").textContent = overview;
+          if (poster) {
+            document.getElementById("poster").src = poster;
+            document.getElementById("poster").alt = title;
+          } else {
+            document.getElementById("poster").style.display = "none";
+          }
+
+          // Update Open Graph for nicer link previews on social media
+          document.getElementById("og-title").content = title + (year ? " (" + year + ")" : "");
+          document.getElementById("tw-title").content = title + (year ? " (" + year + ")" : "");
+          if (overview) {
+            document.getElementById("og-desc").content = overview.slice(0, 160);
+            document.getElementById("tw-desc").content = overview.slice(0, 160);
+          }
+          if (backdrop) {
+            document.getElementById("og-image").content = backdrop;
+            document.getElementById("tw-image").content = backdrop;
+          }
+
+          // Manual "Open in app" button
+          document.getElementById("btn-open").addEventListener("click", function (e) {
+            e.preventDefault();
+            triedApp = false;
+            tryOpenApp();
+          });
+
+          // Show content
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("content").style.display = "block";
+        })
+        .catch(function () {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("error").style.display = "block";
+        });
+
+      // Auto-trigger app open after a short delay so the user briefly sees a loading state
+      // (also gives time for TMDB fetch to populate OG meta if a crawler is reading the page)
+      setTimeout(tryOpenApp, 400);
+
+      // If user came back (app didn't open), they will see the landing page
+      window.addEventListener("pageshow", function () {
+        document.getElementById("loading").style.display = "none";
+      });
+    })();
+  </script>
+</body>
+</html>

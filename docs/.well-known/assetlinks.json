@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ckapps.test5",
+      "sha256_cert_fingerprints": [
+        "79:D2:1D:54:B6:F3:8F:6C:93:68:CD:A5:15:70:C1:EE:0C:46:69:D2:2C:EC:7F:A6:8F:38:C4:B4:42:1B:07:9F"
+      ]
+    }
+  }
+]
