@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0b0b10"/>
+  <title>Platfooorm Movie - Actor</title>
+  <link rel="icon" type="image/png" href="/Platfooorm-Movie/icon.png"/>
+  <meta property="og:type" content="profile"/>
+  <meta property="og:site_name" content="Platfooorm Movie"/>
+  <meta property="og:title" id="og-title" content="Platfooorm Movie"/>
+  <meta property="og:description" id="og-desc" content="Check out this actor on Platfooorm Movie app."/>
+  <meta property="og:image" id="og-image" content="https://developer262391-lang.github.io/Platfooorm-Movie/icon.png"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#08080c;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+    .card{background:#15151c;border-radius:20px;padding:32px;text-align:center;max-width:360px;width:100%}
+    .icon{width:80px;height:80px;border-radius:50%;margin:0 auto 16px;object-fit:contain;background:#1c1c26;padding:16px}
+    h1{font-size:22px;margin-bottom:8px}
+    p{color:#9ca3af;font-size:14px;margin-bottom:20px}
+    .btn{display:inline-block;background:#e50914;color:#fff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px}
+    .store{color:#9ca3af;font-size:12px;margin-top:16px}
+    .store a{color:#e50914;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img class="icon" src="/Platfooorm-Movie/icon.png" alt="Platfooorm"/>
+    <h1>🎭 Actor Profile</h1>
+    <p>View this actor's movies and details in the Platfooorm Movie app.</p>
+    <a class="btn" id="open-btn" href="#">Open in App</a>
+    <p class="store">Don't have the app? <a href="https://play.google.com/store/apps/details?id=com.ckapps.test5">Get it on Play Store</a></p>
+  </div>
+  <script>
+    var APP_SCHEME="platfooormmovie";
+    var APP_PACKAGE="com.ckapps.test5";
+    var PLAY_URL="https://play.google.com/store/apps/details?id="+APP_PACKAGE;
+    var params=new URLSearchParams(window.location.search);
+    var personId=params.get("id")||"";
+    var queryStr="?id="+personId;
+    var deepLink=APP_SCHEME+"://person"+queryStr;
+
+    function tryOpen(){
+      var ua=navigator.userAgent||"";
+      if(/android/i.test(ua)){
+        window.location.href="intent://person"+queryStr+"#Intent;scheme="+APP_SCHEME+";package="+APP_PACKAGE+";S.browser_fallback_url="+encodeURIComponent(PLAY_URL)+";end";
+      }else{
+        window.location.href=deepLink;
+      }
+    }
+    document.getElementById("open-btn").addEventListener("click",function(e){e.preventDefault();tryOpen();});
+    setTimeout(tryOpen,500);
+  </script>
+</body>
+</html>
